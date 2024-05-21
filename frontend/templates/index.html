@@ -1,0 +1,107 @@
+<!-- frontend/templates/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Rendering</title>
+    <link href="{{ url_for('frontend_static', path='/css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <canvas id="mapCanvas" width="800" height="600"></canvas>
+    <button id="findPathBtn">寻路</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const canvas = document.getElementById('mapCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Map data
+            const paths = {{ paths | tojson }};
+            const points = {{ points | tojson }};
+
+            // Selected points
+            let selectedPoints = [];
+
+            // Render map
+            function renderMap() {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Render paths
+                ctx.strokeStyle = 'rgba(128, 128, 128, 0.5)';
+                ctx.lineWidth = 2;
+                for (const pathId in paths) {
+                    const path = paths[pathId];
+                    ctx.beginPath();
+                    ctx.moveTo(parseFloat(path[0][0]), parseFloat(path[0][1]));
+                    ctx.lineTo(parseFloat(path[1][0]), parseFloat(path[1][1]));
+                    ctx.stroke();
+                }
+
+                // Render points
+                for (const pointId in points) {
+                    const point = points[pointId];
+                    ctx.fillStyle = selectedPoints.includes(pointId) ? 'green' : 'rgba(128, 128, 128, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(parseFloat(point[0]), parseFloat(point[1]), 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    // Render point name
+                    ctx.fillStyle = 'black';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(pointId, parseFloat(point[0]) + 10, parseFloat(point[1]) - 10);
+                }
+            }
+
+            // Event listener for selecting points
+            canvas.addEventListener('click', function(event) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = event.clientX - rect.left;
+                const mouseY = event.clientY - rect.top;
+
+                // Check if clicked on a point
+                for (const pointId in points) {
+                    const point = points[pointId];
+                    const distance = Math.sqrt((point[0] - mouseX) ** 2 + (point[1] - mouseY) ** 2);
+                    if (distance <= 5) {
+                        // Toggle point selection
+                        const index = selectedPoints.indexOf(pointId);
+                        if (index === -1) {
+                            if (selectedPoints.length < 2) {
+                                selectedPoints.push(pointId);
+                            }
+                        } else {
+                            selectedPoints.splice(index, 1);
+                        }
+                        renderMap();
+                        break;
+                    }
+                }
+            });
+
+            // Event listener for find path button
+            document.getElementById('findPathBtn').addEventListener('click', function() {
+                if (selectedPoints.length === 2) {
+                    // Send selected points data to backend
+                    fetch('/finding', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(selectedPoints)
+                    }).then(response => {
+                        // Handle response as needed
+                    }).catch(error => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    alert('Please select two points.');
+                }
+            });
+
+            // Initial map rendering
+            renderMap();
+        });
+    </script>
+</body>
+</html>
