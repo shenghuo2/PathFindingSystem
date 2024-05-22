@@ -38,6 +38,31 @@ def process_points() -> dict[int, list[str]]:
 
     return {index+1: list(value[0]) for index, value in enumerate(unique_paths.items())}
 
+# print(process_points()     )
+
+    
+def process_map_points() -> dict[int, list[str]]:
+    data = get_map_data()
+    paths = {}
+    path_id = 1
+
+
+    for point, info in data['points'].items():
+        for connected_point in info['path']:
+            path = sorted([point, connected_point])
+            path_str = ','.join(path)
+
+            if path_str not in paths.values():
+                paths[path_id] = path
+                path_id += 1
+
+
+    unique_paths = {}
+    for path_id, path in paths.items():
+        unique_paths[tuple(path)] = path_id
+
+    return {index+1: list(value[0]) for index, value in enumerate(unique_paths.items())}
+
 def generate_path(points_data:dict[int, list[str]], map_data:dict[dict]) -> dict[int:list[list[str,str],list[str,str]]]:
     paths = {}
     map_data = map_data['points'] 
@@ -76,6 +101,15 @@ def get_points() -> dict[str:list[str,str]]:
     # print(tmp)
     return points
 
+def generate_sublists(lst:list) -> dict:
+    result = {}
+    for i in range(len(lst) - 1):
+        result[i + 1] = [lst[i], lst[i + 1]]
+    return result
+
+# input_list = ['a1', 'a2', 'a3', 'a4']
+# output_dict = generate_sublists(input_list)
+# print(output_dict)
 
 # print(get_points())
 # print(generate_path(process_points(), get_map_data()))
