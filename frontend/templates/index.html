@@ -80,24 +80,43 @@
             });
 
             // Event listener for find path button
-            document.getElementById('findPathBtn').addEventListener('click', function() {
-                if (selectedPoints.length === 2) {
-                    // Send selected points data to backend
-                    fetch('/finding', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(selectedPoints)
-                    }).then(response => {
-                        // Handle response as needed
-                    }).catch(error => {
-                        console.error('Error:', error);
-                    });
-                } else {
-                    alert('Please select two points.');
-                }
-            });
+            // Function to render paths on canvas
+function renderPaths(pathsData) {
+    ctx.strokeStyle = 'green';
+    ctx.lineWidth = 2;
+    for (const pathId in pathsData) {
+        const path = pathsData[pathId];
+        ctx.beginPath();
+        ctx.moveTo(parseFloat(path[0][0]), parseFloat(path[0][1]));
+        ctx.lineTo(parseFloat(path[1][0]), parseFloat(path[1][1]));
+        ctx.stroke();
+    }
+}
+
+// Event listener for find path button
+document.getElementById('findPathBtn').addEventListener('click', function() {
+    if (selectedPoints.length === 2) {
+        // Send selected points data to backend
+        fetch('/finding', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({"selectedPoints":selectedPoints})
+        }).then(response => {
+            // Parse JSON response
+            return response.json();
+        }).then(data => {
+            // Render paths on canvas
+            renderPaths(data);
+        }).catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        alert('Please select two points.');
+    }
+});
+
 
             // Initial map rendering
             renderMap();
