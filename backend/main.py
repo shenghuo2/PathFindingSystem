@@ -5,7 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from backend.utils import generate_path, generate_sublists, get_map_data, get_points, process_map_points, process_points
-from backend.finding import get_relations, get_shortest_path
+from backend.finding import get_relations, dijkstra
 app = FastAPI()
 templates = Jinja2Templates(directory="frontend/templates")
 app.mount("/static", StaticFiles(directory="frontend/static"), name="frontend_static")
@@ -35,6 +35,6 @@ async def finding(request: Request, data: selectedPoints):
     startPoint, endPoint = data.selectedPoints[0], data.selectedPoints[1]
     path: dict[str, list[str]] = get_relations()
     points = get_points()
-    shortest_path, distance = get_shortest_path(startPoint, endPoint, path, points)
+    shortest_path, distance = dijkstra(startPoint, endPoint, path, points)
     result = generate_path(generate_sublists(shortest_path), get_map_data())
     return JSONResponse(content=result)
