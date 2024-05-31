@@ -9,7 +9,14 @@
     <link href="{{ url_for('frontend_static', path='/css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <canvas id="mapCanvas" width="800" height="600"></canvas>
+    <style>
+        body{
+            background-image:  url("static/amap.png");
+            background-repeat: no-repeat;
+            
+        }
+    </style>
+    <canvas id="mapCanvas" width="1500" height="1500"></canvas>
     <button id="findPathBtn">寻路</button>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -49,7 +56,7 @@
                     // Render point name
                     ctx.fillStyle = 'black';
                     ctx.font = '12px Arial';
-                    ctx.fillText(pointId, parseFloat(point[0]) + 10, parseFloat(point[1]) - 10);
+                    //ctx.fillText(pointId, parseFloat(point[0]) + 10, parseFloat(point[1]) - 10);
                 }
             }
 
